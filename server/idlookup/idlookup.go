@@ -37,7 +37,7 @@ func (c *IdLookupClient) IdLookupHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	email, err := c.Lookup(req.Id)
+	email, err := c.lookup(req.Id)
 	if err != nil {
 		http.Error(w, "email not found", http.StatusNotFound)
 		return
@@ -52,8 +52,8 @@ func (c *IdLookupClient) IdLookupHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// Lookup takes an id of an email address and returns the email address if found, or an error if not found.
-func (c *IdLookupClient) Lookup(id string) (string, error) {
+// lookup takes an id of an email address and returns the email address if found, or an error if not found.
+func (c *IdLookupClient) lookup(id string) (string, error) {
 	email, ok := c.idToEmailMap[id]
 	if !ok {
 		return "", errors.New("email not found")

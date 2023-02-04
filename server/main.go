@@ -6,10 +6,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httprate"
 	"github.com/joho/godotenv"
 
-	"github.com/bjornpagen/e2e-marketing-monorepo/server/idlookup"
+	"github.com/bjornpagen/e2e-marketing-monorepo/server/lookup"
 )
 
 func loadEnv() {
@@ -23,42 +27,53 @@ func loadEnv() {
 	}
 }
 
-func main() {
-	// idToEmailMap := map[string]string{
-	// 	"b1a6b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4b0c4": "bjorn.pagen@example.com",
-	// }
+func loadDb() (map[lookup.Id]lookup.User, error) {
+	db := make(map[lookup.Id]lookup.User)
 
-	// load the map from a file
+	b, err := ioutil.ReadFile(os.Getenv("ID_DB"))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(b, &db); err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func main() {
 	loadEnv()
 
-	// open the file
-	file, err := os.Open(os.Getenv("ID_DB"))
+	lookupDb, err := loadDb()
 	if err != nil {
-		log.Fatalln("Error opening ID_DB file:", err)
+		log.Fatalln("Error loading id db:", err)
 	}
 
-	// read the whole file's contents into a byte slice
-	var idDb []byte
-	idDb, err = ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatalln("Error reading ID_DB file:", err)
-	}
+	lookupClient := lookup.New(lookupDb)
 
-	var idToEmailMap map[string]string
-	err = json.Unmarshal(idDb, &idToEmailMap)
-	if err != nil {
-		log.Fatalln("Error unmarshalling ID_DB file:", err)
-	}
-
-	// sample file:
-	//
-
-	// TODO: ip rate limiting
-	idlookupClient := idlookup.New(idToEmailMap)
-	http.HandleFunc("/idlookup", idlookupClient.IdLookupHandler)
+	r := setupRouter()
+	r.Post("/lookup", lookupClient.LookupHandler)
 
 	log.Println("Listening on port 8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatalln("Error starting server:", err)
 	}
+}
+
+func setupRouter() (r *chi.Mux) {
+	r = chi.NewRouter()
+	r.Use(middleware.Logger)
+
+	// Enable httprate request limiter of 100 requests per minute.
+	//
+	// In the code example below, rate-limiting is bound to the request IP address
+	// via the LimitByIP middleware handler.
+	//
+	// To have a single rate-limiter for all requests, use httprate.LimitAll(..).
+	//
+	// Please see _example/main.go for other more, or read the library code.
+	r.Use(httprate.LimitByIP(100, 1*time.Minute))
+
+	return r
 }

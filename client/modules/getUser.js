@@ -1,5 +1,5 @@
 // endpoint is the domain name of the endpoint, no https:// or trailing slash
-const getEmailById = async (endpoint, id) => {
+const getUser = async (endpoint, id) => {
   const response = await fetch(`https://${endpoint}/lookup`, {
     method: "POST",
     headers: {
@@ -15,4 +15,4 @@ const getEmailById = async (endpoint, id) => {
   return response.json();
 }
 
-export { getEmailById };
+export { getUser };

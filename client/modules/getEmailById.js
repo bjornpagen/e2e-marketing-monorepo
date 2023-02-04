@@ -12,8 +12,7 @@ const getEmailById = async (endpoint, id) => {
     return null;
   }
 
-  const data = await response.json();
-  return data.email;
+  return response.json();
 }
 
 export { getEmailById };

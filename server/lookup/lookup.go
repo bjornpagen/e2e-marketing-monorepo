@@ -9,6 +9,8 @@ import (
 type Id string
 type User struct {
 	Email string `json:"email"`
+	First string `json:"first"`
+	Last  string `json:"last"`
 }
 
 type LookupClient struct {

@@ -42,6 +42,23 @@ func loadDb() (map[lookup.Id]lookup.User, error) {
 	return db, nil
 }
 
+func setupRouter() (r *chi.Mux) {
+	r = chi.NewRouter()
+	r.Use(middleware.Logger)
+
+	// Enable httprate request limiter of 100 requests per minute.
+	//
+	// In the code example below, rate-limiting is bound to the request IP address
+	// via the LimitByIP middleware handler.
+	//
+	// To have a single rate-limiter for all requests, use httprate.LimitAll(..).
+	//
+	// Please see _example/main.go for other more, or read the library code.
+	r.Use(httprate.LimitByIP(100, 1*time.Minute))
+
+	return r
+}
+
 func main() {
 	loadEnv()
 
@@ -59,21 +76,4 @@ func main() {
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatalln("Error starting server:", err)
 	}
-}
-
-func setupRouter() (r *chi.Mux) {
-	r = chi.NewRouter()
-	r.Use(middleware.Logger)
-
-	// Enable httprate request limiter of 100 requests per minute.
-	//
-	// In the code example below, rate-limiting is bound to the request IP address
-	// via the LimitByIP middleware handler.
-	//
-	// To have a single rate-limiter for all requests, use httprate.LimitAll(..).
-	//
-	// Please see _example/main.go for other more, or read the library code.
-	r.Use(httprate.LimitByIP(100, 1*time.Minute))
-
-	return r
 }

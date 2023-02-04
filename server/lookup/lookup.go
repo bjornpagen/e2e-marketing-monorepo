@@ -3,6 +3,7 @@ package lookup
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 )
 
@@ -37,7 +38,10 @@ func (c *LookupClient) LookupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.lookup(Id(req.Id))
+	id := Id(req.Id)
+	log.Printf("Looking up id %s", id)
+
+	user, err := c.lookup(id)
 	if err != nil {
 		http.Error(w, "Error looking up id", http.StatusBadRequest)
 		return

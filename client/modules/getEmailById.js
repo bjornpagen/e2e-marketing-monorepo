@@ -1,7 +1,6 @@
-const ENDPOINT_DOMAIN = "my-server.com";
-
-const getEmailById = async id => {
-  const response = await fetch(`https://${ENDPOINT_DOMAIN}/idlookup`, {
+// endpoint is the domain name of the endpoint, no https:// or trailing slash
+const getEmailById = async (endpoint, id) => {
+  const response = await fetch(`https://${endpoint}/idlookup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -2,47 +2,63 @@ package hashlookup
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
-var hashMap = map[string]string{
-	"<hash1>": "user1@example.com",
-	"<hash2>": "user2@example.com",
-	// ... Add more hashes and email addresses
+type HashLookupClient struct {
+	hashToEmailMap map[string]string
 }
 
-// HashLookupHandler is a http.Handler that handles incoming HTTP requests
-// and returns the email address corresponding to the provided hash.
-func HashLookupHandler(w http.ResponseWriter, r *http.Request) {
+// New creates a new client for the hashlookup package.
+func New(m map[string]string) *HashLookupClient {
+	return &HashLookupClient{
+		hashToEmailMap: m,
+	}
+}
+
+type HashLookupRequest struct {
+	Hash string `json:"hash"`
+}
+
+type HashLookupResponse struct {
+	Email string `json:"email"`
+}
+
+func (c *HashLookupClient) HashLookupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var request struct {
-		Hash string `json:"hash"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	var req HashLookupRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 
-	email, ok := hashMap[request.Hash]
-	if !ok {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+	hash := req.Hash
 
-	response, err := json.Marshal(struct {
-		Email string `json:"email"`
-	}{
-		Email: email,
-	})
+	email, err := c.Lookup(hash)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "email not found", http.StatusNotFound)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(response)
+	resp := HashLookupResponse{
+		Email: email,
+	}
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+// Lookup takes a salted Blake3 hash of an email address and returns the email address if found, or an error if not found.
+func (c *HashLookupClient) Lookup(hash string) (string, error) {
+	email, ok := c.hashToEmailMap[hash]
+	if !ok {
+		return "", errors.New("email not found")
+	}
+	return email, nil
 }

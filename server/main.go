@@ -86,6 +86,7 @@ func (s *MyServer) run() (err error) {
 	r := setupRouter()
 
 	r.Post("/lookup", s.lookup.LookupHandler)
+	r.Options("/lookup", s.lookup.OptionsHandler)
 
 	srv := &http.Server{
 		ReadTimeout:  5 * time.Second,

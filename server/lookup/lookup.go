@@ -64,6 +64,12 @@ func (c *LookupClient) LookupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (c *LookupClient) OptionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "https://"+c.clientDomain)
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
 // lookup takes an id of an email address and returns the email address if found, or an error if not found.
 func (c *LookupClient) lookup(id Id) (User, error) {
 	user, ok := c.db[id]

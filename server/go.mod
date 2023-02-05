@@ -6,6 +6,11 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-chi/httprate v0.7.1
 	github.com/joho/godotenv v1.5.0
+	golang.org/x/crypto v0.5.0
 )
 
-require github.com/cespare/xxhash/v2 v2.2.0 // indirect
+require (
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
+)

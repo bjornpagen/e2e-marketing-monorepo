@@ -16,15 +16,17 @@ type User struct {
 }
 
 type LookupClient struct {
-	db  map[Id]User
-	log *log.Logger // logger to be used by the client
+	db           map[Id]User
+	log          *log.Logger // logger to be used by the client
+	clientDomain string
 }
 
 // New creates a new client for the idlookup package.
-func New(db map[Id]User, log *log.Logger) *LookupClient {
+func New(db map[Id]User, log *log.Logger, c string) *LookupClient {
 	return &LookupClient{
-		db:  db,
-		log: log,
+		db:           db,
+		log:          log,
+		clientDomain: c,
 	}
 }
 
@@ -34,6 +36,9 @@ type Request struct {
 type Response User
 
 func (c *LookupClient) LookupHandler(w http.ResponseWriter, r *http.Request) {
+	// Set the Access-Control-Allow-Origin header
+	w.Header().Set("Access-Control-Allow-Origin", "https://"+c.clientDomain)
+
 	var req Request
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&req); err != nil {

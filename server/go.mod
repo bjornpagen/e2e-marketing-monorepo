@@ -8,4 +8,4 @@ require (
 	github.com/joho/godotenv v1.5.0
 )
 
-require github.com/cespare/xxhash/v2 v2.1.2 // indirect
+require github.com/cespare/xxhash/v2 v2.2.0 // indirect

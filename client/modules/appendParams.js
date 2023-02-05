@@ -40,4 +40,4 @@ const appendParams = (paramsArr, domains) => {
   }
 };
 
-export { appendUTMParams };
+export { appendParams };

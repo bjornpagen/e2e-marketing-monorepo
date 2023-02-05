@@ -7,3 +7,5 @@ const createStripeParams = (user) => {
   }
   return params;
 }
+
+export { createStripeParams };

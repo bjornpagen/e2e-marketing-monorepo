@@ -11,3 +11,5 @@ const getStripeUser = async (params, f) => {
   }
   return user;
 }
+
+export { getStripeUser };

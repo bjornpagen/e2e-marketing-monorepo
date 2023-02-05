@@ -98,8 +98,8 @@ func (s *MyServer) run() (err error) {
 	// start server
 	if s.tlsDisabled {
 		log.Println("TLS disabled, starting server on port 8080")
-
 		srv.Addr = ":8080"
+
 		err = srv.ListenAndServe()
 	} else {
 		log.Println("TLS enabled, starting server on port 443")

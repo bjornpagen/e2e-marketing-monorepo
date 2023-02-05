@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 )
 
 type Id string
@@ -15,13 +16,15 @@ type User struct {
 }
 
 type LookupClient struct {
-	db map[Id]User
+	db  map[Id]User
+	log *log.Logger // logger to be used by the client
 }
 
 // New creates a new client for the idlookup package.
-func New(db map[Id]User) *LookupClient {
+func New(db map[Id]User, log *log.Logger) *LookupClient {
 	return &LookupClient{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
@@ -39,7 +42,8 @@ func (c *LookupClient) LookupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := Id(req.Id)
-	log.Printf("Looking up id %s", id)
+	// log the id and the time it was requested
+	c.log.Printf("id: %s, time: %s", id, time.Now().Format(time.RFC3339))
 
 	user, err := c.lookup(id)
 	if err != nil {

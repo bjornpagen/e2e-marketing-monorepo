@@ -67,7 +67,7 @@ func main() {
 		log.Fatalln("Error loading id db:", err)
 	}
 
-	lookupClient := lookup.New(lookupDb)
+	lookupClient := lookup.New(lookupDb, log.New(os.Stderr, "lookup: ", log.LstdFlags))
 
 	r := setupRouter()
 	r.Post("/lookup", lookupClient.LookupHandler)

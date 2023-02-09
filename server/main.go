@@ -64,7 +64,7 @@ func main() {
 	}
 	lookupClient := lookup.New(lookupDb, log.New(os.Stderr, "lookup: ", log.LstdFlags), os.Getenv("CLIENT_DOMAIN"))
 
-	server := &MyServer{
+	server := &MainServer{
 		apiDomain:   "api." + os.Getenv("DOMAIN"),
 		lookup:      lookupClient,
 		tlsDisabled: os.Getenv("TLS_DISABLED") == "true",
@@ -75,13 +75,13 @@ func main() {
 	}
 }
 
-type MyServer struct {
+type MainServer struct {
 	apiDomain   string
 	lookup      *lookup.LookupClient
 	tlsDisabled bool
 }
 
-func (s *MyServer) run() (err error) {
+func (s *MainServer) run() (err error) {
 	// setup router
 	r := setupRouter()
 
